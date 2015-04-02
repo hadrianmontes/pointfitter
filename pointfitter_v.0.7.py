@@ -12,11 +12,11 @@ from scipy.optimize import curve_fit
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from scipy.interpolate import UnivariateSpline
-import scipy.special._ufuncs_cxx
+#import scipy.special._ufuncs_cxx
 import numpy as np
 from numpy import e,pi,exp,cos,sin,tan
-import tkMessageBox,tkFileDialog
-import FileDialog
+#import tkMessageBox,tkFileDialog
+#import FileDialog
 
 class fitter(Frame):
     def __init__(self,mainframe):
