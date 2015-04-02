@@ -45,7 +45,7 @@ def lecturagrafico(entradatotal):
     x=[]
     y=[]
     for l in f:
-        #Read onli the lines with data
+        #Read only the lines with data
         try:
             x.append(float(l.split()[0]))
             y.append(float(l.split()[1]))
