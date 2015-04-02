@@ -201,6 +201,7 @@ class fitter(Frame):
         histogram.add_command(label='Rebining',command=self.rebining)
         menu.add_cascade(label="Histogram", menu=histogram)
         chi=Menu(menu,tearoff=0)
+	#Añadimos calculo de chi square
         chi.add_command(label='Chi square analisys',command=self.chisquare)
         menu.add_cascade(label="Chi Square", menu=chi)
         #Añadimos seleccion de rango
