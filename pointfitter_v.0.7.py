@@ -16,7 +16,7 @@ from scipy.interpolate import UnivariateSpline
 import numpy as np
 from numpy import e,pi,exp,cos,sin,tan
 #import tkMessageBox,tkFileDialog
-#import FileDialog
+import FileDialog
 
 class fitter(Frame):
     def __init__(self,mainframe):
