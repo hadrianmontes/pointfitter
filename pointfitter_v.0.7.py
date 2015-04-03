@@ -12,6 +12,7 @@ from scipy.optimize import curve_fit
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from scipy.interpolate import UnivariateSpline
+from scipy import stats
 #import scipy.special._ufuncs_cxx
 import numpy as np
 from numpy import e,pi,exp,cos,sin,tan
@@ -222,18 +223,21 @@ class fitter(Frame):
             y=yy[j]
             sig=sigma[j]
             suma+=(y-eval('self.funcion'+str(index)+r'var(x'+p0+')'))**2/(sig**2)
+	prob=1-stats.chi2.cdf(suma,len(xx)-index)
         self.windowc=Toplevel()
         ws = self.windowc.winfo_screenwidth()
         hs = self.windowc.winfo_screenheight()
         # calculate position x, y
         w=175
-        h=75
+        h=100
         x = (ws/2) - (w/2)
         y = (hs/2) - (h/2)
         self.windowc.geometry('%dx%d+%d+%d' % (w, h, x, y))
         ttk.Label(self.windowc,text='Value of Chi Square').grid(column=0,row=0)
         ttk.Label(self.windowc,text=str(suma)).grid(column=0,row=1)
-        ttk.Button(self.windowc,text='Ok',command=self.winchi).grid(column=0,row=2)
+	ttk.Label(self.windowc,text='Probability').grid(column=0,row=2)
+	ttk.Label(self.windowc,text=str(prob)).grid(column=0,row=3)
+        ttk.Button(self.windowc,text='Ok',command=self.winchi).grid(column=0,row=4)
         return
     def winchi(self,*args):
         self.windowc.destroy()
