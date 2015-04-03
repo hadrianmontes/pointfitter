@@ -10,7 +10,7 @@ import matplotlib.pylab as plt
 import sys
 
 def lecturagrafico(entradatotal):
-   #Open the xvg file
+   #open the xvg file
    data=[]
    leyenda=[]
    for entrada in entradatotal:
