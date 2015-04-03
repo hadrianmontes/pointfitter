@@ -78,11 +78,11 @@ class fitter(Frame):
         ttk.Button(mainframe,text='Help',command=self.funcionhelp).grid(column=2,row=7)
         
         #Entrada de la funcion
-        ttk.Label(mainframe,text='Escribe la función de x y de parametros adecuados\n, usar en este orden: a,b,c,d,f,g,h,i,j').grid(column=0,row=8)
+        ttk.Label(mainframe,text='Write a function of x using up to 9 parameters\n, use then in this order: a,b,c,d,f,g,h,i,j').grid(column=0,row=8)
         self.entrada=StringVar()
         self.name = ttk.Entry(mainframe, textvariable=self.entrada).grid(column=1,row=8)
         #Entrada numero de parametros
-        ttk.Label(mainframe,text='Numero de parametros utilizados').grid(column=0,row=9,sticky=N)
+        ttk.Label(mainframe,text='Number of user parameters').grid(column=0,row=9,sticky=N)
         self.parametros=IntVar()
         ttk.Entry(mainframe,textvariable=self.parametros).grid(column=1,row=9,sticky=N)
         #Ploteado y ajustes
@@ -92,7 +92,7 @@ class fitter(Frame):
         self.salida=StringVar()
         ttk.Entry(mainframe,textvar=self.salida,width=35).grid(column=1,row=11,columnspan=2)
         #Escribimos las incertidumbres
-        ttk.Label(mainframe,text='Incertidumbre').grid(column=0,row=12)
+        ttk.Label(mainframe,text='Uncertainty').grid(column=0,row=12)
         self.incertidumbresa=StringVar()        
         ttk.Entry(mainframe,textvar=self.incertidumbresa,width=35).grid(column=1,row=12,columnspan=2)
         #Representación grafica
@@ -123,8 +123,8 @@ class fitter(Frame):
         self.T=Text(mainframe,width=40)
         self.T.grid(column=0,row=1,rowspan=6,sticky=N)
         # Editamos los valores de las columnas
-        ttk.Label(mainframe,text=' Para definir los ejes'+
-        ' escribir\n una funcion de C1,C2,.. y pulsar set X o Y.\n El numero junto a C recorre las columnas').grid(column=1,row=3,columnspan=2)
+        ttk.Label(mainframe,text=' For defining the axes'+
+        ' write\n a function of C1,C2,.. and press set X and setY.\n The number following C indicate the column').grid(column=1,row=3,columnspan=2)
         self.setx=StringVar()
         ttk.Entry(mainframe,textvar=self.setx).grid(column=1,row=4)
         ttk.Button(mainframe,text='Set x',command=self.setxcolumn).grid(column=2,row=4)
@@ -179,16 +179,16 @@ class fitter(Frame):
         
         #Añado la opción de ir guardand las diferentes graficas que se hagan
         self.mantenerplot=IntVar()
-        ttk.Checkbutton(mainframe,text='Mantener las graficas entre plots',variable=self.mantenerplot
+        ttk.Checkbutton(mainframe,text='Mantein Graphics Between Plots',variable=self.mantenerplot
             ).grid(column=1,row=1)
             
         #Añadir la opcion de añadir incertidumbres    
         self.usarincertidumbres=IntVar()
-        ttk.Checkbutton(mainframe,text='Usar Incertidumbres',variable=self.usarincertidumbres
+        ttk.Checkbutton(mainframe,text='Use Uncertainties',variable=self.usarincertidumbres
             ).grid(column=1,row=2,sticky=W)
         self.stringincertidumbres=StringVar()
         ttk.Entry(mainframe,textvar=self.stringincertidumbres).grid(column=1,row=6)
-        ttk.Button(mainframe,text='Set Incertidumbres',command=self.setincertidumbres).grid(column=2,row=6)
+        ttk.Button(mainframe,text='Set Uncertainties',command=self.setincertidumbres).grid(column=2,row=6)
         #Splines cubicos
         #ttk.Button(mainframe,text='Interpolate',command=self.splines).grid(column=4,row=12,sticky=W)
         #self.level=StringVar()
@@ -344,7 +344,7 @@ class fitter(Frame):
         try:
             sigma=eval(interpretado)
         except:
-            tkMessageBox.showerror("Error", 'Error al evaluar al expresion comprueba el uso de C mayuscula')
+            tkMessageBox.showerror("Error", 'Error when evaluating the expersion, look for the use of capital C')
         return
         
     def save(self,*args):
@@ -354,7 +354,7 @@ class fitter(Frame):
         try:
             self.fig.savefig(self.rutasave.get())
         except:
-            tkMessageBox.showerror("Error", "Ruta inexistente comprueba la existencia de la carpeta destino")
+            tkMessageBox.showerror("Error", "The destination folder doesn't exist")
     def plotear(self,*args):
         if self.mantenerplot.get()==0:
             self.ax.clear()
