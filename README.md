@@ -1,6 +1,7 @@
 # README #
 
- For the use of pointfitter you will need scipy, tkinter,ttk,matplotlib and numpy. They are included with some distributions of python like the anaconda. There is a problem in windows with the matplotlib installed by anaconda (spyder), it doen't contain one backend needed. This problem is fixed isntalling manually matplotlib.
+ For the use of pointfitter you will need scipy, tkinter,ttk,matplotlib and numpy. They are included with some distributions of python like the anaconda (spyder). There is a problem in Windows with the matplotlib installed by anaconda (spyder). It doen't contain one needed backend. This problem is fixed isntalling manually matplotlib http://matplotlib.org/downloads.html
+ 
 To execute pointfitter just type in your terminal python pointfitter.py or run it from your python editor. The program is very intuitive to use.
 
 ### What is this repository for? ###
