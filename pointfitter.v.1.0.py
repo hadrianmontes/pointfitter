@@ -180,7 +180,7 @@ class fitter(Frame):
         
         #Añado la opción de ir guardand las diferentes graficas que se hagan
         self.mantenerplot=IntVar()
-        ttk.Checkbutton(mainframe,text='Mantein Graphics Between Plots',variable=self.mantenerplot
+        ttk.Checkbutton(mainframe,text='Maintain Graphics Between Plots',variable=self.mantenerplot
             ).grid(column=1,row=1)
             
         #Añadir la opcion de añadir incertidumbres    
