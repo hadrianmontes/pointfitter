@@ -11,4 +11,4 @@ This repository was created to make useful to plot and analyse data, pointfitter
 
 ### Who do I talk to? ###
 
-* hadrianmontes
+* hadrianmontes@gmail.com
