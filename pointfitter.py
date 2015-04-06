@@ -99,6 +99,8 @@ class fitter(Frame):
         #Representación grafica
         self.point=StringVar()
         self.point.set('x')
+        self.line=StringVar()
+        self.line.set('')
         self.fig = Figure()
         self.ax = self.fig.add_subplot(111)
         self.canvas=FigureCanvasTkAgg(self.fig,master=mainframe)
@@ -213,13 +215,42 @@ class fitter(Frame):
         #Añadimos opciones sobre como hacer el plot
         Plot=Menu(menu,tearoff=0)
         Plot.add_command(label='Reset Plot',command=self.cleargraph)
+        Plot.add_command(label='Select Point Marker',command=self.selectpoint)
         menu.add_cascade(label='Plot',menu=Plot)
         
+        
         root.config(menu=menu)
+    def selectpoint(self,*args):
+        self.windowselect=Toplevel()
+        ws = self.windowselect.winfo_screenwidth()
+        hs = self.windowselect.winfo_screenheight()
+        self.select=StringVar()
+        self.select.set(self.point.get())
+        self.selectline=StringVar()
+        self.selectline.set(self.line.get())
+        # calculate position x, y
+        w=175
+        h=100
+        x = (ws/2) - (w/2)
+        y = (hs/2) - (h/2)
+        self.windowselect.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        ttk.Label(self.windowselect,text='Enter the marker').grid(column=0,row=0,columnspan=2)
+        ttk.Entry(self.windowselect,textvariable=self.select).grid(column=0,row=1,columnspan=2)
+        ttk.Label(self.windowselect,text='Enter the linestyle').grid(column=0,row=2,columnspan=2)
+        ttk.Entry(self.windowselect,textvariable=self.selectline).grid(column=0,row=3,columnspan=2)
+        ttk.Button(self.windowselect,text='Cancel',command=self.windowselect.destroy).grid(column=0,row=4)
+        ttk.Button(self.windowselect,text='Save',command=self.selectmanual).grid(column=1,row=4)
+        return
+    def selectmanual(self,*args):
+        self.point.set(self.select.get())
+        self.line.set(self.selectline.get())
+        self.windowselect.destroy()
+        return
+        
     def cleargraph(self,*args):
         self.ax.clear()
         self.canvas.draw()
-	return
+        return
     def exportdata(self,*args):
         global xx,yy,sigma
         self.rutaexport=StringVar()
@@ -385,9 +416,9 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
         self.canvas.draw()
         self.xmin.set(xx.min())
         self.xmax.set(xx.max())
@@ -477,10 +508,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion1var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion1var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion1var(puntos,salida[0]))
@@ -501,10 +532,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion2var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion2var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion2var(puntos,salida[0],salida[1]))
@@ -525,10 +556,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion3var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion3var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion3var(puntos,salida[0],salida[1],salida[2]))
@@ -549,10 +580,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion4var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion4var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion4var(puntos,salida[0],salida[1],salida[2],salida[3]))
@@ -573,10 +604,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion5var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion5var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion5var(puntos,salida[0],salida[1],salida[2],salida[3],salida[4]))
@@ -597,10 +628,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion6var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion6var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion6var(puntos,salida[0],salida[1],salida[2],salida[3],salida[4],salida[5]))
@@ -621,10 +652,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion7var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion7var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion7var(puntos,salida[0],salida[1],salida[2],salida[3],salida[4],salida[5],salida[6]))
@@ -645,10 +676,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion8var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion8var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion8var(puntos,salida[0],salida[1],salida[2],salida[3],salida[4],salida[5],salida[6],salida[7]))
@@ -669,10 +700,10 @@ class fitter(Frame):
         if self.mantenerplot.get()==0:
             self.ax.clear()
         if self.usarincertidumbres.get()==0:
-            self.ax.plot(xx,yy,linestyle='',marker=self.point.get())
+            self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion9var,xx,yy,p0=self.p0)
         else:
-            self.ax.errorbar(xx,yy,yerr=sigma,linestyle='',marker=self.point.get())
+            self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
             salida,cov=curve_fit(self.funcion9var,xx,yy,sigma=sigma,p0=self.p0)
         puntos=np.linspace(xx.min(),xx.max(),1000)
         self.ax.plot(puntos,self.funcion9var(puntos,salida[0],salida[1],salida[2],salida[3],salida[4],salida[5],salida[6],salida[7],salida[8]))
