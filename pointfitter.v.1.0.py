@@ -45,10 +45,10 @@ class fitter(Frame):
         self.indicef['Gaussiana'].index(3)
         self.indicef['Gaussiana'].helpp('Gaussian of amplitud a, mean b and width c')
         
-        self.indicef.update({'Recta':funcionindex()})
-        self.indicef['Recta'].funcion('recta(x,a,b)')
-        self.indicef['Recta'].index(2)
-        self.indicef['Recta'].helpp('function a+b*x')
+        self.indicef.update({'Linear':funcionindex()})
+        self.indicef['Linear'].funcion('recta(x,a,b)')
+        self.indicef['Linear'].index(2)
+        self.indicef['Linear'].helpp('function a+b*x')
         
         self.indicef.update({'Poisson':funcionindex()})
         self.indicef['Poisson'].funcion('poisson(x,a,b)')
