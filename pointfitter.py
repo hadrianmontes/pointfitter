@@ -290,9 +290,13 @@ class fitter(Frame):
         y = (hs/2) - (h/2)
         self.windowc.geometry('%dx%d+%d+%d' % (w, h, x, y))
         ttk.Label(self.windowc,text='Value of Chi Square').grid(column=0,row=0)
-        ttk.Label(self.windowc,text=str(suma)).grid(column=0,row=1)
+	self.suma=StringVar()
+	self.prob=StringVar()
+	self.suma.set(str(suma))
+	self.prob.set(str(prob))
+        ttk.Entry(self.windowc,textvar=self.suma).grid(column=0,row=1)
 	ttk.Label(self.windowc,text='Probability').grid(column=0,row=2)
-	ttk.Label(self.windowc,text=str(prob)).grid(column=0,row=3)
+	ttk.Entry(self.windowc,textvar=self.prob).grid(column=0,row=3)
         ttk.Button(self.windowc,text='Ok',command=self.winchi).grid(column=0,row=4)
         return
     def winchi(self,*args):
