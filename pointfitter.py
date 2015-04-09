@@ -216,10 +216,21 @@ class fitter(Frame):
         Plot=Menu(menu,tearoff=0)
         Plot.add_command(label='Reset Plot',command=self.cleargraph)
         Plot.add_command(label='Select Point Marker',command=self.selectpoint)
+        Plot.add_command(label='Derivate',command=self.derivate)
         menu.add_cascade(label='Plot',menu=Plot)
         
         
         root.config(menu=menu)
+    def derivate(self,*args):
+        global xx, yy
+        xnew=[]
+        ynew=[]
+        for i in range(len(xx)-1):
+            xnew.append(xx[i])
+            ynew.append((yy[i+1]-yy[i])/(xx[i+1]-xx[i]))
+        xx=np.array(xnew)
+        yy=np.array(ynew)
+        return
     def selectpoint(self,*args):
         self.windowselect=Toplevel()
         ws = self.windowselect.winfo_screenwidth()
