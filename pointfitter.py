@@ -212,15 +212,138 @@ class fitter(Frame):
         menu.add_cascade(label="Chi Square", menu=chi)
         #Añadimos seleccion de rango
         edit.add_command(label='Set data Range',command=self.adquisicion)
+
         #Añadimos opciones sobre como hacer el plot
         Plot=Menu(menu,tearoff=0)
         Plot.add_command(label='Reset Plot',command=self.cleargraph)
         Plot.add_command(label='Select Point Marker',command=self.selectpoint)
         Plot.add_command(label='Derivate',command=self.derivate)
+        self.savelegendfile=StringVar()
+        Plot.add_command(label='Prepare Multiple Plot',command=self.legendwindow)
+        Plot.add_command(label='Make Multiple Plot',command=self.importlegendfile)
         menu.add_cascade(label='Plot',menu=Plot)
         
         
         root.config(menu=menu)
+    def legendwindow(self,*args):
+        self.windowlegend=Toplevel()
+        self.savedata=IntVar()
+        self.savefit=IntVar()
+        self.savesigma=IntVar()
+        self.savedata.set(0)
+        self.savefit.set(0)
+        self.labeldata=StringVar()
+        self.labelfit=StringVar()
+        self.pointfit=StringVar()
+        self.linefit=StringVar()
+        self.linefit.set('-')
+        ttk.Button(self.windowlegend,text='Outputile',command=self.selectlegendfile).grid(column=0,row=0)
+        ttk.Entry(self.windowlegend,textvar=self.savelegendfile,width=40).grid(column=1,row=0,columnspan=6)
+        ttk.Checkbutton(self.windowlegend,text='Add Data',variable=self.savedata).grid(column=0,row=1,sticky=W) 
+        ttk.Label(self.windowlegend,text='Label').grid(column=1,row=1)
+        ttk.Entry(self.windowlegend,textvar=self.labeldata).grid(column=2,row=1)
+        ttk.Label(self.windowlegend,text='Marker').grid(column=3,row=1)
+        ttk.Entry(self.windowlegend,textvar=self.point,width=5).grid(row=1,column=4)
+        ttk.Label(self.windowlegend,text='Line Style').grid(row=1,column=5)
+        ttk.Entry(self.windowlegend,textvar=self.line,width=5).grid(row=1,column=6)
+        ttk.Checkbutton(self.windowlegend,text='Save Uncertainties',variable=self.savesigma).grid(column=7,row=1)
+        ttk.Checkbutton(self.windowlegend,text='Add Fit',variable=self.savefit).grid(column=0,row=2,sticky=W) 
+        ttk.Label(self.windowlegend,text='Label').grid(column=1,row=2)
+        ttk.Entry(self.windowlegend,textvar=self.labelfit).grid(column=2,row=2)
+        ttk.Label(self.windowlegend,text='Marker').grid(column=3,row=2)
+        ttk.Entry(self.windowlegend,textvar=self.pointfit,width=5).grid(row=2,column=4)
+        ttk.Label(self.windowlegend,text='Line Style').grid(row=2,column=5)
+        ttk.Entry(self.windowlegend,textvar=self.linefit,width=5).grid(row=2,column=6)
+        ttk.Button(self.windowlegend,text='Ok',command=self.exportlegendfile).grid(row=3,column=7)        
+        return
+    def selectlegendfile(self,*args):
+        self.savelegendfile.set(tkFileDialog.asksaveasfilename())
+        return
+    def exportlegendfile(self,*args):
+        global xx,yy,sigma
+        f=open(self.savelegendfile.get(),'a+')
+        if self.savedata.get()==1:
+            f.write('#Begin\n')
+            f.write(r'#Label '+self.labeldata.get()+'\n')
+            f.write(r'#Marker '+self.point.get()+'\n')
+            f.write(r'#linestyle '+self.line.get()+'\n')
+            f.write(r'#sigma '+str(self.savesigma.get())+'\n')
+            for i in range(len(xx)):
+                f.write(str(xx[i])+'\t'+str(yy[i]))
+                if self.savesigma.get()==1:
+                    f.write('\t'+str(sigma[i]))
+                f.write('\n')
+            f.write(r'#END'+'\n')
+        if self.savefit.get()==1:
+            puntos=np.linspace(xx.min(),xx.max(),1000)
+            index=self.parametros.get()
+            p0=''
+            for i in range(index):
+                p0+=','+self.salida.get().split()[2*i+1]
+            y=eval('self.funcion'+str(index)+r'var(puntos'+p0+')')
+            f.write('#Begin\n')
+            f.write(r'#Label '+self.labelfit.get()+'\n')
+            f.write(r'#Marker '+self.pointfit.get()+'\n')
+            f.write(r'#linestyle '+self.linefit.get()+'\n')
+            f.write(r'#sigma '+'0'+'\n')
+            for i in range(len(puntos)):
+                f.write(str(puntos[i])+'\t'+str(y[i]))
+                f.write('\n')
+            f.write(r'#END'+'\n')
+        f.close()
+        self.windowlegend.destroy()
+        return
+    def importlegendfile(self,*args):
+        filename=tkFileDialog.askopenfilename()
+        f=open(filename,'r')
+        self.ax.clear()
+        siz=2
+        x=[]
+        y=[]
+        sigma=[]
+        for l in f:
+            if l.startswith(r'#Label'):
+                if len(l.split())==2:
+                    Label=l.split()[1]
+                elif len(l.split())>2:
+                    Label=''
+                    for palabra in l.split()[1:]:
+                        Label=Label+' '+palabra
+                else:
+                    Label=srt(n)
+            elif l.startswith(r'#Marker'):
+                if len(l.split())==2:
+                    Marker=l.split()[1]
+                else:
+                    Marker=''
+            elif l.startswith(r'#linestyle'):
+                if len(l.split())==2:
+                    Linestyle=l.split()[1]
+                else:
+                    Linestyle=''
+            elif l.startswith(r'#sigma'):
+                siz=siz+int(l.split()[1])
+            elif not l.startswith(r'#'):
+                if len(l.split())>1:
+                    if siz==2:
+                        x.append(float(l.split()[0]))
+                        y.append(float(l.split()[1]))      
+                    elif siz==3:
+                        x.append(float(l.split()[0]))
+                        y.append(float(l.split()[1]))
+                        sigma.append(float(l.split()[2]))
+            elif l.startswith(r'#END'):
+                if siz==2:
+                    self.ax.plot(x,y,marker=Marker,linestyle=Linestyle,label=Label)
+                elif siz==3:
+                    self.ax.errorbar(x,y,yerr=sigma,marker=Marker,linestyle=Linestyle,label=Label)
+                x=[]
+                y=[]
+                siz=2
+        f.close()
+        self.ax.legend(loc='best')
+        self.canvas.draw()
+        return
     def derivate(self,*args):
         global xx, yy
         xnew=[]
@@ -245,7 +368,7 @@ class fitter(Frame):
         x = (ws/2) - (w/2)
         y = (hs/2) - (h/2)
         self.windowselect.geometry('%dx%d+%d+%d' % (w, h, x, y))
-        ttk.Label(self.windowselect,text='Enter the marker').grid(column=0,row=0,columnspan=2)
+        ttk.Label(self.windowselect,text='Enter the marker ').grid(column=0,row=0,columnspan=2)
         ttk.Entry(self.windowselect,textvariable=self.select).grid(column=0,row=1,columnspan=2)
         ttk.Label(self.windowselect,text='Enter the linestyle').grid(column=0,row=2,columnspan=2)
         ttk.Entry(self.windowselect,textvariable=self.selectline).grid(column=0,row=3,columnspan=2)
@@ -953,5 +1076,5 @@ class funcionindex:
 root=Tk()
 root.title('Point Fitter')
 fitter(root)
-
+#root.iconbitmap("icon.png")
 root.mainloop()
