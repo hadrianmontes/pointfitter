@@ -4,7 +4,7 @@
  
 To execute pointfitter just type in your terminal python pointfitter.py or run it from your python editor. The program is very intuitive to use.
 There is also a compiled program of the version 1.0 for windows. It's avaliable from here https://mega.co.nz/#!IgdSzBQZ!drBDQGnt_UhLdGQ8jWEwuhS_bwPfACOQX3xXANrYCeE
-Current Version of the Script 1.1
+Current Version of the Script 1.2
 ### What is this repository for? ###
 
 This repository was created to make useful to plot and analyse data, pointfitter lets you fit data to any function. It include some pre-set functions but you can write anyone you want up to 9 parameters.
