@@ -15,7 +15,7 @@ from scipy.interpolate import UnivariateSpline
 from scipy import stats
 #import scipy.special._ufuncs_cxx
 import numpy as np
-from numpy import e,pi,exp,cos,sin,tan,log,log10
+from numpy import e,pi,exp,cos,sin,tan,log,log10,arctan,arccos,arcsin
 import tkMessageBox,tkFileDialog
 #import FileDialog
 
