@@ -245,26 +245,49 @@ class fitter(Frame):
         
         root.config(menu=menu)
     def legendwindow(self,*args):
+        '''Esta funcion define una ventana para guardar un archivo que permita realizar despues
+        un plot de varias curvas con sus leyendas'''
+        # Creamos una nueva ventana
         self.windowlegend=Toplevel()
+        # Esta variable sera 1 si queremos guardar los datos y 0 en caso contrario
         self.savedata=IntVar()
+        # Esta variable sera 1 si queremos guardar el ajuste y 0 en caso contrario
         self.savefit=IntVar()
+        # Escogemos si queremos guardar los datos con incertidumbre o no
         self.savesigma=IntVar()
+        # De principio ponemos todas las variables a 0 (False)
         self.savedata.set(0)
         self.savefit.set(0)
+        # Estas 2 variables label* indican las etiquetas de los datos y el ajuste
         self.labeldata=StringVar()
         self.labelfit=StringVar()
+        # pointfit y linefit son los estilos de linea y los marker del ajuste
         self.pointfit=StringVar()
         self.linefit=StringVar()
+        # Ponemos como valor predeterminado para el estilo de linea del ajuste una linea continua
+        # Para el marker no ponemos nada predeterminado, esto se corresponde con no marcar los puntos
         self.linefit.set('-')
+
+        # Ponemos un boton para escoger el archivo en el que vamos a guardar las instrucciones para
+        # hacer la grafica. Si este archivo ya existe se anhadiran los datos de estas nuevas graficas
+        # al final del archivo. Escribe el nombre del archivo en la variable self.savelegendfile
         ttk.Button(self.windowlegend,text='Outputile',command=self.selectlegendfile).grid(column=0,row=0)
+        # La siguiente linea es una caja donde se pondra la ruta al archivo anterior
         ttk.Entry(self.windowlegend,textvar=self.savelegendfile,width=40).grid(column=1,row=0,columnspan=6)
-        ttk.Checkbutton(self.windowlegend,text='Add Data',variable=self.savedata).grid(column=0,row=1,sticky=W) 
+
+        # Las siguientes lineas son las opciones de que datos queremos guardar y como queremos hacerlo
+        # Esta primera es un  checkbutton para escoger si queremos guardar los datos de entrada
+        ttk.Checkbutton(self.windowlegend,text='Add Data',variable=self.savedata).grid(column=0,row=1,sticky=W)
+        # En general ahora tenemos un serie de labels y entradas correspondientes a los valores especificados en las labels
         ttk.Label(self.windowlegend,text='Label').grid(column=1,row=1)
         ttk.Entry(self.windowlegend,textvar=self.labeldata).grid(column=2,row=1)
         ttk.Label(self.windowlegend,text='Marker').grid(column=3,row=1)
+         # Para los datos de entrada se coge de forma predefenida los valores usados en las graficas de la ventana principal
+         # Tanto para el marker como para el linestyle
         ttk.Entry(self.windowlegend,textvar=self.point,width=5).grid(row=1,column=4)
         ttk.Label(self.windowlegend,text='Line Style').grid(row=1,column=5)
         ttk.Entry(self.windowlegend,textvar=self.line,width=5).grid(row=1,column=6)
+        # Checkbuttons para escoger si guardamos los datos del ajuste y las incertidumbres
         ttk.Checkbutton(self.windowlegend,text='Save Uncertainties',variable=self.savesigma).grid(column=7,row=1)
         ttk.Checkbutton(self.windowlegend,text='Add Fit',variable=self.savefit).grid(column=0,row=2,sticky=W) 
         ttk.Label(self.windowlegend,text='Label').grid(column=1,row=2)
@@ -275,31 +298,50 @@ class fitter(Frame):
         ttk.Entry(self.windowlegend,textvar=self.linefit,width=5).grid(row=2,column=6)
         ttk.Button(self.windowlegend,text='Ok',command=self.exportlegendfile).grid(row=3,column=7)        
         return
+
     def selectlegendfile(self,*args):
+        ''' Abre una ventana para escoger el archivo donde guardaremos los datos
+        del plot multiple, guarda la ruta en la variable self.savelegendfile'''
         self.savelegendfile.set(tkFileDialog.asksaveasfilename())
         return
+    
     def exportlegendfile(self,*args):
+        ''' Esta funcion se encarga de crear el archivo con los datos y la configuracion
+        para crear la representacion multiple'''
+        # Cargamos unas variables globales, no se porque no las meti en self, quien sabe
         global xx,yy,sigma
+        # Abrimos el archivo en modo append
         f=open(self.savelegendfile.get(),'a+')
+        # SI tenemos que guardar los datos los guardamos
         if self.savedata.get()==1:
             f.write('#Begin\n')
+            # Escribimos la configuracion de esta grafica
             f.write(r'#Label '+self.labeldata.get()+'\n')
             f.write(r'#Marker '+self.point.get()+'\n')
             f.write(r'#linestyle '+self.line.get()+'\n')
             f.write(r'#sigma '+str(self.savesigma.get())+'\n')
+
+            # REcorremos xx y guardamos los datos
             for i in range(len(xx)):
                 f.write(str(xx[i])+'\t'+str(yy[i]))
+                # Si queremos guardar las incertidumbres las guardamos
                 if self.savesigma.get()==1:
                     f.write('\t'+str(sigma[i]))
                 f.write('\n')
+            # Marcamos el final de unos datos
             f.write(r'#END'+'\n')
         if self.savefit.get()==1:
+            # Hacemos un linspace para calcular el ajuste en esos puntos
             puntos=np.linspace(xx.min(),xx.max(),1000)
+            # Cogemos los parametros del ajuste (el nombre de los parametros)
             index=self.parametros.get()
-            p0=''
+            p0=''  # Aqui guardamos los valores de los parametros
+            # Recorremos todos los parametros y guardamos en p0 su valor
             for i in range(index):
                 p0+=','+self.salida.get().split()[2*i+1]
+            # Evaluamos la funcion en los puntos creados con linspace
             y=eval('self.funcion'+str(index)+r'var(puntos'+p0+')')
+            # Escribimos los datos y su configuracion
             f.write('#Begin\n')
             f.write(r'#Label '+self.labelfit.get()+'\n')
             f.write(r'#Marker '+self.pointfit.get()+'\n')
@@ -310,16 +352,24 @@ class fitter(Frame):
                 f.write('\n')
             f.write(r'#END'+'\n')
         f.close()
+        # Nos cargamos la ventana que creamos para configurar el plot
         self.windowlegend.destroy()
         return
+
     def importlegendfile(self,*args):
+        ''' Esta funcion se encarga de escoger un archivo preparado para un plot multiple
+        y de hacer su representacion'''
+        # Esogemos el archivo con una ventana
         filename=tkFileDialog.askopenfilename()
+        # Lo abrimos en modo lectura
         f=open(filename,'r')
+        # Borramos los datos de la grafica
         self.ax.clear()
-        siz=2
-        x=[]
+        siz=2  # Esto es un parametro para tener en cuenta si hay incertidumbres o no (porque vale 2 y no 0 es un misterio)
+        x=[]  # x, y, sigma guardaran los datos de la grafica
         y=[]
         sigma=[]
+        # Recorremos el archivo y cargamos los datos y al configuracion
         for l in f:
             if l.startswith(r'#Label'):
                 if len(l.split())==2:
@@ -341,8 +391,9 @@ class fitter(Frame):
                 else:
                     Linestyle=''
             elif l.startswith(r'#sigma'):
-                siz=siz+int(l.split()[1])
+                siz=siz+int(l.split()[1])  # Siz quedata valiendo 2 si no hay incertidumbres y 3 si las hay
             elif not l.startswith(r'#'):
+                # Si no es linea de configuracion guardamos los datos
                 if len(l.split())>1:
                     if siz==2:
                         x.append(float(l.split()[0]))
@@ -352,6 +403,7 @@ class fitter(Frame):
                         y.append(float(l.split()[1]))
                         sigma.append(float(l.split()[2]))
             elif l.startswith(r'#END'):
+                # Graficamos los datos cada vez que lleguemos a un END y reiniciamos los datos y el siz
                 if siz==2:
                     self.ax.plot(x,y,marker=Marker,linestyle=Linestyle,label=Label)
                 elif siz==3:
@@ -363,8 +415,12 @@ class fitter(Frame):
         self.ax.legend(loc='best')
         self.canvas.draw()
         return
+
     def derivate(self,*args):
+        ''' Calcula la derivada de una forma muy cutre,
+        como la pendiente entre dos puntos consecutivos'''
         global xx, yy
+        # xnew y ynew seran los valores de las derivadas
         xnew=[]
         ynew=[]
         for i in range(len(xx)-1):
@@ -373,39 +429,53 @@ class fitter(Frame):
         xx=np.array(xnew)
         yy=np.array(ynew)
         return
+
     def selectpoint(self,*args):
+        ''' Crea una ventana con la configuracion para cambiar el estilo de puntos
+        y de la linea de los datos'''
+        # Crea la ventana
         self.windowselect=Toplevel()
+        # Guardamos los datos del tamanho de la ventana
         ws = self.windowselect.winfo_screenwidth()
         hs = self.windowselect.winfo_screenheight()
         self.select=StringVar()
         self.select.set(self.point.get())
         self.selectline=StringVar()
         self.selectline.set(self.line.get())
-        # calculate position x, y
+        # calculate position x, y del centro de la pantalla
         w=175
         h=100
         x = (ws/2) - (w/2)
         y = (hs/2) - (h/2)
+        # Ponemos la pantalla en el centro
         self.windowselect.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        # Ponemos unas entradas para la configuracion de los puntos
         ttk.Label(self.windowselect,text='Enter the marker ').grid(column=0,row=0,columnspan=2)
         ttk.Entry(self.windowselect,textvariable=self.select).grid(column=0,row=1,columnspan=2)
         ttk.Label(self.windowselect,text='Enter the linestyle').grid(column=0,row=2,columnspan=2)
         ttk.Entry(self.windowselect,textvariable=self.selectline).grid(column=0,row=3,columnspan=2)
+        # Botones para guardar los cambios o para descartarlos
         ttk.Button(self.windowselect,text='Cancel',command=self.windowselect.destroy).grid(column=0,row=4)
         ttk.Button(self.windowselect,text='Save',command=self.selectmanual).grid(column=1,row=4)
         return
+
     def selectmanual(self,*args):
+        '''Guarda los datos de la configuracion de los puntos'''
         self.point.set(self.select.get())
         self.line.set(self.selectline.get())
         self.windowselect.destroy()
         return
         
     def cleargraph(self,*args):
+        '''Borra los datos de la grafica y la deja vacia'''
         self.ax.clear()
         self.canvas.draw()
         return
+
     def exportdata(self,*args):
+        ''' Guarda los x,y,sigma actuales (tras aplicar las conversiones de la columna) en un archivo'''
         global xx,yy,sigma
+        # Abrimos una ventana para escoger el archivo donde guardamos los datos
         self.rutaexport=StringVar()
         self.rutaexport.set(tkFileDialog.asksaveasfilename())
         f=open(self.rutaexport.get(),'w+')
@@ -421,18 +491,29 @@ class fitter(Frame):
         return
             
     def chisquare(self,*args):
+        ''' Devuelve el resultado del test de chi cuadrada del ajuste'''
         global xx,yy,sigma
+        # CArgamos la cantidad de parametros
         index=self.parametros.get()
+        # En po iremos guardando los valores de los parametros
         p0=''
         for i in range(index):
             p0+=','+self.salida.get().split()[2*i+1]
+        # Vamos a ir sumando en suma el valor de la diferencia entre el
+        # ajuste y los datos
         suma=0
         for j in range(len(xx)):
             x=xx[j]
             y=yy[j]
             sig=sigma[j]
+            # La suma va ponderada por la incertidumbre
             suma+=(y-eval('self.funcion'+str(index)+r'var(x'+p0+')'))**2/(sig**2)
+        # La funcion stats.chi2.cdf toma como argumentos el valor de la chi2
+        # y el numero de grados delibertad y devuelve el area bajo la curva
+        # pero el lado que no queremos, por ello se lo restamos a 1
 	prob=1-stats.chi2.cdf(suma,len(xx)-index)
+        # Creamos una ventana para poner los resultados del test
+        # Necesitamos localizar el centro y el tamño de la ventana
         self.windowc=Toplevel()
         ws = self.windowc.winfo_screenwidth()
         hs = self.windowc.winfo_screenheight()
@@ -442,6 +523,7 @@ class fitter(Frame):
         x = (ws/2) - (w/2)
         y = (hs/2) - (h/2)
         self.windowc.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        # Estribimos los valores
         ttk.Label(self.windowc,text='Value of Chi Square').grid(column=0,row=0)
 	self.suma=StringVar()
 	self.prob=StringVar()
@@ -450,63 +532,97 @@ class fitter(Frame):
         ttk.Entry(self.windowc,textvar=self.suma).grid(column=0,row=1)
 	ttk.Label(self.windowc,text='Probability').grid(column=0,row=2)
 	ttk.Entry(self.windowc,textvar=self.prob).grid(column=0,row=3)
+        # Creamos un boton para cerrar la ventana
         ttk.Button(self.windowc,text='Ok',command=self.winchi).grid(column=0,row=4)
         return
+
     def winchi(self,*args):
+        ''' Destrutye la ventana con el resultado del test de chi2'''
         self.windowc.destroy()
         return
+
     def fileinput(self,*args):
+        ''' Abre una ventana para escoger el archivo de datos de entrada y los lee y carga'''
         filename=tkFileDialog.askopenfilename()
         self.entradafile.set(filename)
         global datos,xx,yy
+        # La funcion lectura se encarga de leer los datos
+        # Tambien devuelve un string con todo el archivo
+        # para que sea mostrado en pantalla
         datos,archivoentrada2=self.lectura(filename)
         self.archivoescrito.set(archivoentrada2)
         #xx=datos[0]
         #yy=datos[1]
+        
+        # Borramos la caja con el archivo y lo reescribimos
         self.T.delete(0.0,END)
         self.T.insert(END, self.archivoescrito.get())
         return
+
     def funcionselect2(self,*args):
+        # Carga la funcion predefinida seleccionada
         self.entrada.set(self.indicef[self.funcion.get()].funcion)
         self.parametros.set(self.indicef[self.funcion.get()].index)
         return
+
     def funcionhelp(self,*args):
+        # Muestra la ayuda de una funcion predefinida
         tkMessageBox.showinfo('Info',self.indicef[self.funcion.get()].helpp)
         return
+
     def setxcolumn(self,*args):
+        '''Usa la expresion de entrada de los datos x en funcion
+        de las columnas para crear una lista con los valores de las x'''
         global xx
         xx=[]
+        # Interpretado se encarga de traducir la entrada del usuario en una
+        # expresion de los datos de entrada que entienda python
         interpretado=''
+        # Esta variable indica si es necesario reemplazar los valores
+        # que vamos leyendo por algo que entienda python
         replaceindex=0
+        # Nos indica el factor por el que tenemos que multiplicar nuestro numero
+        # para traducirlo en columnas, es necesario para poder tener mas de 10 columnas
         numero=1
+        # Nos indica el numero total que estamos leyendo, es necesario para valores
+        # mayores que 10 de la columna
         total=0
+        # Recorremos los caracteres de la expresion de entrada para parsearlos
         for i in range(len(self.setx.get())):
-            if replaceindex==0:
+            if replaceindex==0: # Si no hay que interpretar como numero
+                # Si empieza por C lo substituimos por una referencia a la lista de datos
+                # si no lo escribimos sin mas
                 if self.setx.get()[i]!='C':
                     interpretado=interpretado+self.setx.get()[i]
                 else:
                     replaceindex=1
                     interpretado=interpretado+'np.array(datos'
-            else:
-                try:
+            else: # Si hay que interpretar como numero
+                try: # Si es un numero los sumamos al total
                     total=total*numero+int(self.setx.get()[i])
                     numero=numero*10
-                except:                                    
+                except:  # Si no cancelamos el replace, escribimos el numero total
+                    # y escribimos el caracter que toque
                     interpretado=interpretado+'['+str(total-1)+'])'+self.setx.get()[i]
                     replaceindex=0
                     total=0
                     numero=1
+        # Si al acabar la expresion estabamos en modo interpretar escribimos el numero
         if replaceindex!=0:
             interpretado=interpretado+'['+str(total-1)+'])'
             replaceindex=0
             numero=1
             total=0
-        try:
+        try:  # Intentamos elvalur la expresion resultante
             xx=eval(interpretado)
-        except:
+        except:  # SI no podemos abrimos una ventana de error
             tkMessageBox.showerror("Error", 'Error al evaluar al expresion comprueba el uso de C mayuscula')
         return
+
     def setycolumn(self,*args):
+        '''Usa la expresion de entrada de los datos x en funcion
+        de las columnas para crear una lista con los valores de las y'''
+        # Deberia ser identico a setxcolumn
         global yy
         yy=[]
         interpretado=''
@@ -539,7 +655,11 @@ class fitter(Frame):
         except:
             tkMessageBox.showerror("Error", 'Error al evaluar al expresion comprueba el uso de C mayuscula')
         return
+
     def setincertidumbres(self,*args):
+        '''Usa la expresion de entrada de los datos sigma en funcion
+        de las columnas para crear una lista con los valores de las sigma'''
+        # Deberia ser como setxcolumn
         global sigma, datos
         sigma=[]
         interpretado=''
@@ -562,6 +682,7 @@ class fitter(Frame):
         return
         
     def save(self,*args):
+        '''Abre una ventana para escoger donde guardar una grafica y guarda la grafica actual'''
         self.rutasave.set(tkFileDialog.asksaveasfilename(filetypes=(('Portable Document Format','*.pdf' ),
                                                                                        ('Portable Network Graphics','*.png'),
                                                                                        ('All files','*.*'))))
@@ -569,20 +690,27 @@ class fitter(Frame):
             self.fig.savefig(self.rutasave.get())
         except:
             tkMessageBox.showerror("Error", "The destination folder doesn't exist")
+
     def plotear(self,*args):
+        '''Actualiza los valores asmostrados en la grafica proncipal'''
+        # Si no queremos mantener los valores antiguos los borramos
         if self.mantenerplot.get()==0:
             self.ax.clear()
+        # Hacemos el plot con o sin incertidumbres
         if self.usarincertidumbres.get()==0:
             self.ax.plot(xx,yy,linestyle=self.line.get(),marker=self.point.get())
         else:
             self.ax.errorbar(xx,yy,yerr=sigma,linestyle=self.line.get(),marker=self.point.get())
         self.canvas.draw()
+        # Guardamos los valores minimos y maximos para ser mostrados en el programa
         self.xmin.set(xx.min())
         self.xmax.set(xx.max())
         self.ymin.set(yy.min())
         self.ymax.set(yy.max())
         return
+
     def setxlabel(self,*args):
+        '''Abre una ventana para escribir el titulo del eje x'''
         self.window=Toplevel()
         ws = self.window.winfo_screenwidth()
         hs = self.window.winfo_screenheight()
@@ -597,12 +725,16 @@ class fitter(Frame):
         ttk.Button(self.window,text='Ok',command=self.setxlabel2).grid(column=0,row=2)
         self.window.focus_force()          
         return
+
     def setxlabel2(self,*args):
+        '''Funcion auxiliar que se encarga de guardar los cambios del titulo del eje x'''
         self.ax.set_xlabel(self.xaxe.get())
         self.canvas.draw()
         self.window.destroy()
         return
+
     def setylabel(self,*args):
+                '''Abre una ventana para escribir el titulo del eje y'''
         self.windowy=Toplevel()
         
         ws = self.windowy.winfo_screenwidth()
@@ -618,12 +750,15 @@ class fitter(Frame):
         ttk.Button(self.windowy,text='Ok',command=self.setylabel2).grid(column=0,row=2)
         self.windowy.focus_force()        
         return
+
     def setylabel2(self,*args):
+        '''Funcion auxiliar que se encarga de guardar los cambios del titulo del eje x'''
         self.ax.set_ylabel(self.yaxe.get())
         self.canvas.draw()
         self.windowy.destroy()
         return
     def settitle(self,*args):
+        '''Abre una ventana para escribir el titulo de la grafica'''
         self.windowt=Toplevel()
         
         ws = self.windowt.winfo_screenwidth()
@@ -639,12 +774,16 @@ class fitter(Frame):
         ttk.Button(self.windowt,text='Ok',command=self.settitle2).grid(column=0,row=2)
         self.windowt.focus_force()  
         return
+
     def settitle2(self,*args):
+        ''' Funcion auxiliar que guarda el titulo de la grafica'''
         self.ax.set_title(self.titleaxe.get())
         self.canvas.draw()
         self.windowt.destroy()
         return
+
     def selectorajuste(self,*args):
+        '''Escoge que ajuste hay que hacer segun cuantos parametros tengamos'''
         index=self.parametros.get()
         if index not in range(1,10):
             tkMessageBox.showerror("Error", 'The number of parameters must be an integer between 1 and 6')
