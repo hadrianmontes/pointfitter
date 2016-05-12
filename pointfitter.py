@@ -734,7 +734,7 @@ class fitter(Frame):
         return
 
     def setylabel(self,*args):
-                '''Abre una ventana para escribir el titulo del eje y'''
+        '''Abre una ventana para escribir el titulo del eje y'''
         self.windowy=Toplevel()
         
         ws = self.windowy.winfo_screenwidth()
